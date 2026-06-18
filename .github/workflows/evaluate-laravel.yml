@@ -73,20 +73,20 @@ jobs:
               touch database/database.sqlite
 
               cat > .env <<EOF
-          APP_NAME=Laravel
-          APP_ENV=testing
-          APP_KEY=
-          APP_DEBUG=true
-          APP_URL=http://localhost
+APP_NAME=Laravel
+APP_ENV=testing
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost
 
-          DB_CONNECTION=sqlite
-          DB_DATABASE=${{ github.workspace }}/database/database.sqlite
+DB_CONNECTION=sqlite
+DB_DATABASE=${{ github.workspace }}/database/database.sqlite
 
-          CACHE_STORE=array
-          SESSION_DRIVER=array
-          QUEUE_CONNECTION=sync
-          MAIL_MAILER=array
-          EOF
+CACHE_STORE=array
+SESSION_DRIVER=array
+QUEUE_CONNECTION=sync
+MAIL_MAILER=array
+EOF
 
               echo ">>> Generating app key" >> evaluation-results/full-output.txt
               php artisan key:generate --force >> evaluation-results/full-output.txt 2>&1
@@ -106,95 +106,95 @@ jobs:
                 mkdir -p tests/Feature/Hidden
 
                 cat > tests/Feature/Hidden/TasksCrudHiddenTest.php <<'PHP'
-          <?php
+<?php
 
-          namespace Tests\Feature\Hidden;
+namespace Tests\Feature\Hidden;
 
-          use Illuminate\Foundation\Testing\RefreshDatabase;
-          use Illuminate\Support\Facades\DB;
-          use Illuminate\Support\Facades\Route;
-          use Illuminate\Support\Facades\Schema;
-          use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
+use Tests\TestCase;
 
-          class TasksCrudHiddenTest extends TestCase
-          {
-              use RefreshDatabase;
+class TasksCrudHiddenTest extends TestCase
+{
+    use RefreshDatabase;
 
-              public function test_tasks_table_and_resource_routes_exist(): void
-              {
-                  $this->assertTrue(Schema::hasTable('tasks'), 'The tasks table does not exist.');
+    public function test_tasks_table_and_resource_routes_exist(): void
+    {
+        $this->assertTrue(Schema::hasTable('tasks'), 'The tasks table does not exist.');
 
-                  $expectedRoutes = [
-                      'tasks.index',
-                      'tasks.create',
-                      'tasks.store',
-                      'tasks.show',
-                      'tasks.edit',
-                      'tasks.update',
-                      'tasks.destroy',
-                  ];
+        $expectedRoutes = [
+            'tasks.index',
+            'tasks.create',
+            'tasks.store',
+            'tasks.show',
+            'tasks.edit',
+            'tasks.update',
+            'tasks.destroy',
+        ];
 
-                  foreach ($expectedRoutes as $routeName) {
-                      $this->assertTrue(
-                          Route::has($routeName),
-                          "Missing route name: {$routeName}. Use Route::resource('tasks', TaskController::class)."
-                      );
-                  }
-              }
+        foreach ($expectedRoutes as $routeName) {
+            $this->assertTrue(
+                Route::has($routeName),
+                "Missing route name: {$routeName}. Use Route::resource('tasks', TaskController::class)."
+            );
+        }
+    }
 
-              public function test_task_title_is_required(): void
-              {
-                  $response = $this
-                      ->from('/tasks/create')
-                      ->post('/tasks', [
-                          'title' => '',
-                          'is_done' => false,
-                      ]);
+    public function test_task_title_is_required(): void
+    {
+        $response = $this
+            ->from('/tasks/create')
+            ->post('/tasks', [
+                'title' => '',
+                'is_done' => false,
+            ]);
 
-                  $response->assertSessionHasErrors(['title']);
-              }
+        $response->assertSessionHasErrors(['title']);
+    }
 
-              public function test_task_can_be_created_updated_and_deleted(): void
-              {
-                  $createResponse = $this->post('/tasks', [
-                      'title' => 'Hidden Task',
-                      'is_done' => false,
-                  ]);
+    public function test_task_can_be_created_updated_and_deleted(): void
+    {
+        $createResponse = $this->post('/tasks', [
+            'title' => 'Hidden Task',
+            'is_done' => false,
+        ]);
 
-                  $this->assertContains($createResponse->getStatusCode(), [200, 201, 302]);
+        $this->assertContains($createResponse->getStatusCode(), [200, 201, 302]);
 
-                  $this->assertDatabaseHas('tasks', [
-                      'title' => 'Hidden Task',
-                  ]);
+        $this->assertDatabaseHas('tasks', [
+            'title' => 'Hidden Task',
+        ]);
 
-                  $taskId = DB::table('tasks')
-                      ->where('title', 'Hidden Task')
-                      ->value('id');
+        $taskId = DB::table('tasks')
+            ->where('title', 'Hidden Task')
+            ->value('id');
 
-                  $this->assertNotNull($taskId, 'The created task id was not found.');
+        $this->assertNotNull($taskId, 'The created task id was not found.');
 
-                  $updateResponse = $this->put('/tasks/'.$taskId, [
-                      'title' => 'Updated Hidden Task',
-                      'is_done' => true,
-                  ]);
+        $updateResponse = $this->put('/tasks/'.$taskId, [
+            'title' => 'Updated Hidden Task',
+            'is_done' => true,
+        ]);
 
-                  $this->assertContains($updateResponse->getStatusCode(), [200, 201, 302]);
+        $this->assertContains($updateResponse->getStatusCode(), [200, 201, 302]);
 
-                  $this->assertDatabaseHas('tasks', [
-                      'id' => $taskId,
-                      'title' => 'Updated Hidden Task',
-                  ]);
+        $this->assertDatabaseHas('tasks', [
+            'id' => $taskId,
+            'title' => 'Updated Hidden Task',
+        ]);
 
-                  $deleteResponse = $this->delete('/tasks/'.$taskId);
+        $deleteResponse = $this->delete('/tasks/'.$taskId);
 
-                  $this->assertContains($deleteResponse->getStatusCode(), [200, 204, 302]);
+        $this->assertContains($deleteResponse->getStatusCode(), [200, 204, 302]);
 
-                  $this->assertDatabaseMissing('tasks', [
-                      'id' => $taskId,
-                  ]);
-              }
-          }
-          PHP
+        $this->assertDatabaseMissing('tasks', [
+            'id' => $taskId,
+        ]);
+    }
+}
+PHP
 
                 echo ">>> Running hidden tests" >> evaluation-results/full-output.txt
                 php artisan test --filter=TasksCrudHiddenTest --colors=never >> evaluation-results/full-output.txt 2>&1
@@ -218,26 +218,26 @@ jobs:
           export EVAL_MESSAGE="$MESSAGE"
 
           python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
+import json
+import os
+from pathlib import Path
 
-          output_path = Path("evaluation-results/full-output.txt")
-          output = output_path.read_text(errors="replace") if output_path.exists() else ""
+output_path = Path("evaluation-results/full-output.txt")
+output = output_path.read_text(errors="replace") if output_path.exists() else ""
 
-          data = {
-              "submission_id": os.environ.get("SUBMISSION_ID"),
-              "exercise_slug": os.environ.get("EXERCISE_SLUG"),
-              "test_suite": os.environ.get("TEST_SUITE"),
-              "student_branch": os.environ.get("STUDENT_BRANCH"),
-              "status": os.environ.get("EVAL_STATUS", "failed"),
-              "score": int(os.environ.get("EVAL_SCORE", "0")),
-              "message": os.environ.get("EVAL_MESSAGE", "Evaluation failed."),
-              "output": output[-12000:]
-          }
+data = {
+    "submission_id": os.environ.get("SUBMISSION_ID"),
+    "exercise_slug": os.environ.get("EXERCISE_SLUG"),
+    "test_suite": os.environ.get("TEST_SUITE"),
+    "student_branch": os.environ.get("STUDENT_BRANCH"),
+    "status": os.environ.get("EVAL_STATUS", "failed"),
+    "score": int(os.environ.get("EVAL_SCORE", "0")),
+    "message": os.environ.get("EVAL_MESSAGE", "Evaluation failed."),
+    "output": output[-12000:]
+}
 
-          Path("evaluation-results/result.json").write_text(json.dumps(data, indent=2))
-          PY
+Path("evaluation-results/result.json").write_text(json.dumps(data, indent=2))
+PY
 
           echo "eval_status=$STATUS" >> "$GITHUB_OUTPUT"
 
